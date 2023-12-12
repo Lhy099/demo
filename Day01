@@ -9,3 +9,80 @@ HarmonyOS 是新一代的智能终端操作系统，为不同设备的智能化�
 ● 语法和Next版本基本一致-API会更丰富，语言校验会更强。
 ● 拍照-扫码-导航-API会更多。
 起步-DevEco Studio
+1.Stage模型
+APP结构关系图 以module为模块 包括UIAbility→ Page→Component
+●entry是一个Module应用包 对应根目录的build-profile.json5文件中的modules
+●entryability是一个UIAbility包含用户界面的应用组件(一个展示UI的窗口任务 对应src/main/module.json5中的abilties)
+●pages是页面
+●components是组件
+2.HarmonyOS应用模型Stage&FA
+趋势是以Stage为主应用模型是HarmonyOS为开发者提供的应用程序所需能力的抽象提炼，它提供了应用程序必备的组件和运行机制。有了应用模型，开发者可以基于一套统一的模型进行应用开发，使应用开发更简单、高效。
+换言之- 应用模型是鸿蒙开发一切的基础，因为只有基于该应用模型我们才可以开发对应的应用和业务。
+应用模型包含几个要素应用组件-应用进程-应用线程-应用任务管理-应用配置文件
+区别在于什么Stage有三类进程分别为主进程，extensionAbility进程以及渲染进程 相对于FA多了一个extensionAbility进程
+应用模型是开发鸿蒙应用的基础底座，但是鸿蒙先后推出了FA和Stage，鸿蒙4.0和鸿蒙Next都将Stage作为主推方向，所以我们主要基于Stage模型来学习和开发我们目前的应用。
+3.UIAbility-(界面能力组件)
+从上一个小节中，我们发现Stage模型提到了UIAbility组件包含UI界面绘制，主要和用户交互。
+● UIAbility组件是一种包含UI界面的应用组件，主要用于和用户交互。
+官网介绍-UIAbility是系统调度的基本单元，可以给应用提供绘制界面的窗口。
+提问：那UIAbility是什么形式，它是个按钮？ 容器？ 还是一个抽象组件？
+回答：UIAbility可以理解成一个对象实例，它基于Stage模型来完成绘制窗口任务，至于按钮-表格这些都是属于UIAbility的下一层页面中的内容，UIAbility可以通过多个页面来完成一个功能模块，甚至是一个应用。 
+提问：那我们一个Stage模型里面应该有几个UIAbility呢？
+回答：默认创建项目的时候是一个，这一个UIAbility下可以管控几个，几十个，几百个我们的页面，也就是我们一个UIAbility足够开发一个应用，当然，我们在一些复杂业务中，也可以多来几个解构一下业务的冗余度
+一句话总结：一个基于Stage模型的鸿蒙4.0/鸿蒙Next的应用使用一个UIAbility就可以完成一个应用的开发。
+后续，我们会在神领物流项目中实现多个UIAbility间的通讯
+4.组件基础-什么是ArkTs
+ArkTS是HarmonyOS优选的主力应用开发语言。ArkTS围绕应用开发在TypeScript（简称TS）生态基础上做了进一步扩展，继承了TS的所有特性，是TS的超集。
+也就是前端开发过程中所有的js/ts语法大部分支持的，比如es6中的箭头函数-模板字符串-promise-async/await-数组对象方法
+ArkTS通过装饰器 @Component 和 @Entry 装饰 struct 关键字声明的数据结构，构成一个自定义组件。
+即为@Entry  自定义组件中提供了一个 build 函数，开发者需在该函数内以链式调用的方式进行基本的 UI 描述，UI 描述的方法请参考 UI 描述规范。
+struct-自定义组件基于struct实现
+要想实现一段UI的描述，必须使用struct关键字来声明- 注意不能有继承关系-组件名不能系统组件名重名
+@Component
+struct Index{
+      
+}
+@CustomDialog
+struct Index2{
+
+}
+struct关键字声明的UI描述-必须被@Component或者@CustomDialog修饰
+● Component修饰符
+Component装饰器只能修饰struct关键字声明的结构，被修饰后的struct具备组件的描述(渲染)能力
+● build函数
+用于定义组件的UI描述，一个struct结构必须实现build函数
+sg
+@Component
+struct MyComponent{
+      build(){
+            
+      }
+}
+build函数是组件(Component)必须提供以及实现的一个函数，build函数可以没有内容，如果有的话，必须有且只有一个容器组件(可以放置子组件的组件)- 
+只有entry里面有限制- component里面没有限制
+常见容器组件- Flex-Column-Row-List-Grid-Panel
+entry修饰符,以下为empty示例注意 一个页面最多出现一次emptyentry将自定义组件定义为UI页面的入口，也就是我们原来前端常说的一个页面，最多可以使用entry装饰一个自定义组件(在一个ets文件中)-如下面的代码就是不被允许的
+@Entry  //一次
+@Component
+struct Index {
+
+  build() {
+  
+  }
+}
+@Entry //2次 不被允许
+@Component
+struct Index2 {
+  build() {
+
+  }
+}
+entry修饰的组件，最终会被注册，具体文件位置-在main下的resources下的base下的profile的下的main_pages.json
+即为main/resources/base/profile/main_pages.json
+1. 自动注册-新建组件时，采用新建Page的方式
+2. 手动注册-新建一个ets文件，自己在main_pages.json中手动添加路径
+注意：
+   如果你手动删除了某一个带entry的组件，你需要手动去main_page中去删除该路径，否则编译会报错
+
+#小操作1 组件复用之header-main-footer例子
+

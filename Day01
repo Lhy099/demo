@@ -85,4 +85,153 @@ entry修饰的组件，最终会被注册，具体文件位置-在main下的reso
    如果你手动删除了某一个带entry的组件，你需要手动去main_page中去删除该路径，否则编译会报错
 
 #小操作1 组件复用之header-main-footer例子
+@Entry
+@Component
+struct Index {
+  @State message: string = 'Hello World'
 
+  build() {
+    Row() {
+      Column() {
+        Header()
+        Main()
+        Footer()
+      }
+
+    }
+
+  }
+}
+
+@Component
+struct Header{
+  build(){
+    Row(){
+      Text("Haeder")
+    }
+      .width('100%')
+      .height(50)
+    .backgroundColor(Color.Pink)
+    .justifyContent(FlexAlign.Center)
+  }
+}
+@Component
+struct Main{
+  build(){
+    Row(){
+      Text("Main")
+    }
+    .width('100%')
+    .height(50)
+    .backgroundColor(Color.Blue)
+    .justifyContent(FlexAlign.Center)
+  }
+}
+@Component
+struct Footer{
+  build(){
+    Row(){
+      Text("Footer")
+        .fontColor(Color.White)
+    }
+    .width('100%')
+    .height(50)
+    .backgroundColor(Color.Pink)
+    .justifyContent(FlexAlign.Center)
+  }
+}
+总结：
+● 一个UI描述必须使用struct来声明，不能继承
+● struct必须被Component或者CustomDialog修饰
+● struct必须实现build方法，build方法可以没有元素，但是有的话有且只有一个可容纳子组件的容器组件(entry修饰的组件)
+● entry修饰符表示该组件是页面级组件，一个文件中只允许修饰一个struct组件
+● 采用分拆组件的形式可以有效解解耦我们的业务
+基础-系统组件(ArkUI)
+常用系统组件
+   Button Text Column Row Flex Stack Scroll  List TextInput  Image 
+● Text 文本组件-（Span子组件）
+● Column 列组件，纵向排列，Flex布局主轴是Y （任意子组件）
+● Row 行组件，横向向排列，Flex布局主轴是X （任意子组件）
+● Flex 以弹性方式布局子组件的容器组件。(存在二次布局，官方推荐有性能要求，使用Column和Row代替) （任意子组件）
+● Button 按钮组件 （单子组件）
+● TextInput 输入框组件 （无子组件）
+● Image （无子组件）
+● Button (单个子组件)
+● List (限制ListItem子组件)
+● Scroll (限制单个子组件)
+● 使用组件采用 组件名() 的语法
+● 有构造参数采用 组件名(参数)的语法
+● 组件里放置子组件采用  组件名() { 子组件的语法  } 的链式语法
+● 组件设置属性采用 组件名().width().height() 的语法
+● 组件又有属性又有子组件采用 组件名(){ ... 子组件  }.width().height() 的语法
+横向布局 采用ROW
+@Entry
+@Component
+struct ComponentCase {
+  @State message: string = 'Hello World'
+
+  build() {
+    Row() {
+      Column() {
+
+
+        Row({ space: 15 }) {
+          Column()
+            .width(100)
+            .height(200)
+            .backgroundColor(Color.Pink)
+          Column()
+            .width(100)
+            .height(200)
+            .backgroundColor(Color.Red)
+          Column()
+            .width(100)
+            .height(200)
+            .backgroundColor(Color.Blue)
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.Center)
+      }
+      .width('100%')
+    }
+    .height('100%')
+
+  }
+}
+纵向布局
+@Entry
+@Component
+struct Layout {
+
+  build() {
+    Column() {
+      RowCase()
+      ColumnCase()
+    }.height('100%').backgroundColor(Color.Grey)
+  }
+}
+
+@Component
+struct RowCase {
+  build() {
+    Row() {
+      Column().height(150).width(100).backgroundColor(Color.Pink)
+      Column().height(150).width(100).backgroundColor(Color.Red)
+      Column().height(150).width(100).backgroundColor(Color.Blue)
+    }
+    .width('100%')
+    .alignItems(VerticalAlign.Top)
+    .justifyContent(FlexAlign.SpaceAround)
+  }
+}
+
+@Component
+struct ColumnCase {
+  build() {
+    Column() {
+      Column().height(100).width(150).backgroundColor(Color.Pink)
+      Column().height(100).width(150).backgroundColor(Color.Red)
+      Column().height(100).width(150).backgroundColor(Color.Blue)
+    }.height(400).width('100%').justifyContent(FlexAlign.SpaceEvenly)
+  }
+}

@@ -235,3 +235,212 @@ struct ColumnCase {
     }.height(400).width('100%').justifyContent(FlexAlign.SpaceEvenly)
   }
 }
+
+#关于Flex横纵向
+@Entry
+@Component
+struct ComponentCase {
+  @State message: string = 'Hello World'
+  build() {
+    Scroll() {
+      Row() {
+        Column() {
+          Text("老高你讲的真烂")
+          Text(){
+            Span("¥")
+              .fontSize(12)
+            Span("50.45")
+              .fontSize(20)
+          }
+          // css 支持调整布局
+          Row({ space:15 }) {
+            Column()
+              .width(100)
+              .height(200)
+              .backgroundColor(Color.Pink)
+            Column()
+              .width(100)
+              .height(200)
+              .backgroundColor(Color.Red)
+            Column()
+              .width(100)
+              .height(200)
+              .backgroundColor(Color.Blue)
+          }
+          .width('100%')
+          // .justifyContent(FlexAlign.Start)
+          .justifyContent(FlexAlign.Center)
+          // .justifyContent(FlexAlign.End)
+          // .justifyContent(FlexAlign.SpaceBetween)
+          // .justifyContent(FlexAlign.SpaceAround)
+          // .justifyContent(FlexAlign.SpaceEvenly)
+
+          Column({ space: 20 }) {
+            Column()
+              .width(200)
+              .height(100)
+              .backgroundColor(Color.Pink)
+            Column()
+              .width(200)
+              .height(100)
+              .backgroundColor(Color.Red)
+            Column()
+              .width(200)
+              .height(100)
+              .backgroundColor(Color.Blue)
+          }.margin({
+            top: 20
+          })
+
+          Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.SpaceAround }) {
+            Column()
+              .width(100)
+              .height(200)
+              .backgroundColor(Color.Pink)
+            Column()
+              .width(100)
+              .height(200)
+              .backgroundColor(Color.Red)
+            Column()
+              .width(100)
+              .height(200)
+              .backgroundColor(Color.Blue)
+          }
+          .margin({
+            top: 200
+          })
+
+        }
+        .width('100%')
+      }
+    }
+
+  }
+}
+
+基础-组件事件监听原生组件的事件和设置属性的方式是一样的都是链式调用，值得注意的是，我们注册事件都要使用箭头函数的写法，Next版本会有对于匿名函数function的限制
+尝试给一个TextInput和一个按钮注册一个值改变事件和点击事件
+@Entry
+@Component
+struct Event {
+
+  build() {
+    Row() {
+      Column({ space: 15 }) {
+        Row() {
+          TextInput({ placeholder: '请输入用户名' })
+            .backgroundColor('#f4f5f6')
+            .width('100%').onChange((value) => {
+            AlertDialog.show({
+              message: value
+            })
+          })
+        }.padding({
+          left: 20,
+          right: 20
+        })
+
+        Row() {
+          Button("登录")
+            .width('100%')
+            .onClick(() => {
+              AlertDialog.show({
+                message: '点击了按钮'
+              })
+            })
+
+        }.padding({
+          left: 20,
+          right: 20
+        })
+
+      }
+      .width('100%')
+    }
+    .height('100%')
+  }
+}
+在注册事件中的逻辑务必使用箭头函数 () => {}，极不推荐 function() {}
+1. 因为function中this指向为undefind
+2. Next下一代不再支持funtion匿名函数声明
+3. 箭头函数中的this指向当前struct实例，可以方便的调用方法和获取属性
+当我们事件处理逻辑比较复杂，写在UI描述中无法抽提的时候，我们可以在struct结构体中定义
+struct Event {
+  login () {
+    AlertDialog.show({
+      message: '登录成功'
+    })
+  }
+
+  ...
+   Button("登录")
+            .width('100%')
+            .onClick(() => {
+              this.login()
+            })
+}
+属性定义
+当我们需要在组件中记录一些状态时，变量应该显示的在struct中声明，并注明类型
+比如-登录账户和密码
+struct Event {
+  loginName: string = ""
+  password: string = ""
+  
+}
+我们看代码示例时，会发现 public和private关键字，
+如果不写或者写public 表示该属性可被外界即父组件赋值,
+如果写private表示该属性只会被该组件的this获取
+实现一个简单的登录过程
+import promptAction from '@ohos.promptAction'
+@Entry
+@Component
+struct EventCase {
+  // arkTS
+  account: string = "" // 公有面量
+  password: string = '' // 只能在当前组件使用
+  login() {
+    if(this.account === 'admin' && this.password === '123456') {
+      promptAction.showToast({ message: '登录成功' })
+    }else {
+      promptAction.showToast({ message: '用户名或者密码错误' })
+    }
+  }
+  getBtnEnable(): boolean {
+    // if(this.account !== "" && this.password !== "") {
+    //   return true
+    // }
+    // return false
+    return this.account !== "" && this.password !== ""
+  }
+
+  build() {
+    Row() {
+      Column({ space: 20 }) {
+        TextInput({
+          placeholder: '请输入用户名'
+        }).height(40)
+          .width('80%')
+          .onChange(value => {
+            this.account = value
+          })
+        TextInput({
+          placeholder: '请输入密码',
+        }).height(40)
+          .type(InputType.Password)
+          .width('80%')
+          .onChange(value => {
+            this.password = value
+          })
+        Button("登录")
+          .width('80%')
+          .onClick(() => {
+            // AlertDialog.show({ message: "登录成功" })
+            this.login()
+          })
+          .enabled(this.getBtnEnable())
+      }
+      .width('100%')
+    }
+    .height('100%')
+  }
+}
